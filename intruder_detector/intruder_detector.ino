@@ -15,14 +15,18 @@ SR04 sr04 = SR04(ECHO_PIN,TRIG_PIN);
 
 int melody[] = {
   NOTE_C4, NOTE_C7};
-int duration = 100;
+int duration = 50;
 
-bool armed = false;
+bool armed = true;
 
 bool detected = false;
 
+int buzzer = 8;
+
 void setup() {
     Serial.begin(115200);
+
+    pinMode(buzzer,OUTPUT);
 
     #if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) /*stm32duino*/|| defined(USBCON) /*STM32_stm32*/ \
         || defined(SERIALUSB_PID)  || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_attiny3217)
@@ -55,11 +59,14 @@ void loop() {
     if (TinyReceiverDecode()) {
         if (TinyIRReceiverData.Command == 0x45){
             armed = true;
+            digitalWrite(13,HIGH);
             Serial.println("power button received");        
         }
         else if (TinyIRReceiverData.Command == 0x47){
             armed = false;
             detected = false;
+            digitalWrite(buzzer,LOW);
+            digitalWrite(13,LOW);
             Serial.println("stop button recieved");
         }
         Serial.println(TinyIRReceiverData.Command, HEX);
@@ -76,9 +83,10 @@ void loop() {
                 // Output the voice after several minutes
                 delay(duration);
             }
+            digitalWrite(buzzer,HIGH);
         }
     }
-    Serial.print(sr04.Distance());
-    Serial.println("cm");
+    // Serial.print(sr04.Distance());
+    // Serial.println("cm");
 }
 
